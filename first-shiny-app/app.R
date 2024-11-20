@@ -3,8 +3,7 @@ library(shinydashboard)
 library(readxl)
 
 graduation_list <- read_excel("/home/michael-hungbo/code/Shiny/first-shiny-app/NYSC Second 202324CURRENT.xlsx") %>%
-  distinct() # Remove duplicate rows
-
+  distinct() 
 total_graduates <- nrow(graduation_list)
 first_class_count <- nrow(graduation_list[graduation_list$ClassOfGrade == "First Class", ])
 second_class_upper_count <-  nrow(graduation_list[graduation_list$ClassOfGrade == "Second Class Upper", ])
