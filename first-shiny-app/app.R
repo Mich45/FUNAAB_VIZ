@@ -22,6 +22,15 @@ department_counts <- graduation_list %>%
   arrange(desc(first_class_count)) %>%
   head(10)
 
+# Filter data for all colleges and count by grades
+
+college_counts <- graduation_list %>% 
+  filter(ClassOfGrade == "First Class") %>%
+  group_by(College) %>%
+  summarise(first_class_count = n())
+  
+  print(college_counts)
+  
 
 ui <- dashboardPage(
   dashboardHeader(title = "FUNAAB 2024 GRADUATION LIST VISUALIZATION"),
@@ -34,13 +43,22 @@ ui <- dashboardPage(
       valueBoxOutput("secondClassLowerPercentage", width = 3),
   ),
   fluidRow(
-    # Add a plot output for the bar plot
+    # Add a plot output for the first plot
     box(
-      title = "Top 10 Departments with Highest Number of First-Class Graduates",
+      title = "Top 10 Departments with Highest Number of First Class Graduates",
       status = "primary",
       solidHeader = TRUE,
       collapsible = TRUE,
-      plotOutput("barPlot")
+      plotOutput("firstBarPlot")
+    ),
+    
+    # Add a plot output for the second plot
+    box(
+      title = "Number of First Class Graduates by Department",
+      status = "primary",
+      solidHeader = TRUE,
+      collapsible = TRUE,
+      plotOutput("secondBarPlot")
     )
   )
 )
@@ -87,7 +105,7 @@ server <- function(input, output) {
   })
   
   # Render the horizontal bar plot
-  output$barPlot <- renderPlot({
+  output$firstBarPlot <- renderPlot({
     ggplot(department_counts, aes(x = reorder(DeptmentCode, -first_class_count),
                                   y = first_class_count, 
                                   fill = first_class_count)) +  # Map fill to first_class_count
@@ -103,6 +121,20 @@ server <- function(input, output) {
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
   })
   
+  
+  # Render the second bar plot
+  
+  output$secondBarPlot <- renderPlot(({
+    ggplot(college_counts, aes(x= College, y=first_class_count, fill = first_class_count)) +
+    geom_bar(stat = "identity") +
+    scale_fill_gradient(low = "lavender", high = "purple") +
+    geom_text(aes(label = first_class_count), 
+                hjust = -0.2,  
+                size = 4,      
+                color = "black") + 
+    labs(x = "Number of First Class Graduates", y = "College") +
+    theme_minimal()
+  }))
   
   
 }
