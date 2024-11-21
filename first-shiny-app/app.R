@@ -23,13 +23,30 @@ department_counts <- graduation_list %>%
   head(10)
 
 # Filter data for all colleges and count by grades
-
 college_counts <- graduation_list %>% 
   filter(ClassOfGrade == "First Class") %>%
   group_by(College) %>%
   summarise(first_class_count = n())
-  
-  print(college_counts)
+print(college_counts)
+
+second_class_by_college_counts <- graduation_list %>% 
+  filter(ClassOfGrade == "Second Class Upper") %>% 
+  group_by(College) %>% 
+  summarise(second_class_upper_count = n())
+print(second_class_by_college_counts)
+
+# Total number of male and female students
+female_count <-  graduation_list %>% 
+  filter(Gender == "F") %>% 
+  group_by(Firstname) %>% 
+  nrow()
+print(female_count)
+
+male_count <-  graduation_list %>% 
+  filter(Gender == "M") %>% 
+  group_by(Firstname) %>% 
+  nrow()
+print(male_count)
   
 
 ui <- dashboardPage(
@@ -51,14 +68,13 @@ ui <- dashboardPage(
       collapsible = TRUE,
       plotOutput("firstBarPlot")
     ),
-    
-    # Add a plot output for the second plot
-    box(
-      title = "Number of First Class Graduates by Department",
-      status = "primary",
-      solidHeader = TRUE,
-      collapsible = TRUE,
-      plotOutput("secondBarPlot")
+   
+    # Render the second bar plot in a tab
+    tabBox(
+      title = "First tabBox",
+      id = "tabset1",
+      tabPanel("Tab1", plotOutput("Tab1")),
+      tabPanel("Tab2", "Tab content 2")
     )
   )
 )
@@ -122,9 +138,7 @@ server <- function(input, output) {
   })
   
   
-  # Render the second bar plot
-  
-  output$secondBarPlot <- renderPlot(({
+  output$Tab1 <- renderPlot(({
     ggplot(college_counts, aes(x= College, y=first_class_count, fill = first_class_count)) +
     geom_bar(stat = "identity") +
     scale_fill_gradient(low = "lavender", high = "purple") +
@@ -132,7 +146,7 @@ server <- function(input, output) {
                 hjust = -0.2,  
                 size = 4,      
                 color = "black") + 
-    labs(x = "Number of First Class Graduates", y = "College") +
+    labs(x = "College", y = "Number of First Class Graduates") +
     theme_minimal()
   }))
   
