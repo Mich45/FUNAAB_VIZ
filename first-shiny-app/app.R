@@ -2,9 +2,8 @@ library(tidyverse)
 library(shinydashboard)
 library(readxl)
 
-graduation_list <- read_excel("/home/michael-hungbo/code/Shiny/first-shiny-app/NYSC Second 202324CURRENT.xlsx") %>%
+graduation_list <- read_excel("NYSC Second 202324CURRENT.xlsx") %>%
   distinct() 
-View(graduation_list)
 
 total_graduates <- nrow(graduation_list)
 first_class_count <- nrow(graduation_list[graduation_list$ClassOfGrade == "First Class", ])
@@ -47,6 +46,17 @@ male_count <-  graduation_list %>%
   group_by(Firstname) %>% 
   nrow()
 print(male_count)
+
+female_first_class <- graduation_list %>% 
+  filter(Gender == "F" & ClassOfGrade == "First Class") %>% 
+  nrow()
+print(paste("Female first class:", female_first_class))
+
+male_first_class <- graduation_list %>% 
+  filter(Gender == "M" & ClassOfGrade == "First Class") %>% 
+  nrow()
+print(paste("Male first class:", male_first_class))
+  
   
 
 ui <- dashboardPage(
@@ -71,12 +81,18 @@ ui <- dashboardPage(
    
     # Render the second bar plot in a tab
     tabBox(
-      title = "First tabBox",
       id = "tabset1",
       tabPanel("Tab1", plotOutput("Tab1")),
-      tabPanel("Tab2", "Tab content 2")
+      tabPanel("Tab2", "")
     )
-  )
+  ),
+  
+  fluidRow(
+    infoBox("Female first class students", female_first_class, icon = icon("credit-card"), fill = TRUE, width = 3),
+    infoBox("Male first class students", male_first_class, icon = icon("credit-card"), fill = TRUE, width = 3),
+    infoBox("Total number of female graduating students", female_count, icon = icon("credit-card"), fill = TRUE, width = 3),
+    infoBox("Total number of male graduating students", male_count, icon = icon("credit-card"), fill = TRUE, width = 3)
+  ),
 )
 )
 
@@ -134,7 +150,7 @@ server <- function(input, output) {
                 color = "black") + 
       labs(x = "Department", y = "Number of First Class Graduates") +
       theme_minimal() +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+      theme(axis.text.x = element_text(angle = 45, hjust = 1), panel.grid.major = element_blank())
   })
   
   
@@ -146,10 +162,11 @@ server <- function(input, output) {
                 hjust = -0.2,  
                 size = 4,      
                 color = "black") + 
-    labs(x = "College", y = "Number of First Class Graduates") +
-    theme_minimal()
+    labs(title = "Number of First-Class Graduates by College", x = "College", y = "Number of First Class Graduates") +
+    theme_minimal() +
+    theme(panel.grid.major = element_blank())
   }))
-  
+
   
 }
 
